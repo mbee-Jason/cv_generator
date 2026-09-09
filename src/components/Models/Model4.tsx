@@ -87,7 +87,7 @@ export const Model4 = ({
                   <p className="font-semibold text-teal-900">{f.degree}</p>
                   <p className="text-teal-600 text-xs mt-0.5">{f.institution}</p>
                   <p className="text-teal-500 text-xs">
-                    {f.startYear} - {f.endYear}
+                    {f.startYear} - {f.endYear <= 0 ? "A nos jours" : f.endYear}
                   </p>
                 </div>
               ))}
@@ -131,7 +131,7 @@ export const Model4 = ({
                       )}
                     </p>
                     <p className="text-xs text-neutral-500 whitespace-nowrap">
-                      {exp.startYear} - {exp.endYear}
+                      {exp.startYear} - {exp.endYear <= 0 ? "A nos jours" : exp.endYear}
                     </p>
                   </div>
                   {exp.description && (

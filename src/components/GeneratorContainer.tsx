@@ -294,7 +294,7 @@ export const GeneratorContainer = () => {
     CV_MODELS[0].component;
 
   // Téléchargement du PDF _________________________________________________________________________
-  const downloadPDF = () => {
+  const downloadPDF = async () => {
     const element = document.getElementById("cv-preview");
     if (!element) return;
 
@@ -305,12 +305,34 @@ export const GeneratorContainer = () => {
     cloneElement.style.minHeight = "0";
     cloneElement.style.overflow = "visible";
     cloneElement.style.maxHeight = "none";
-    // Pas besoin d'ombre portée dans un PDF, et ça retire au passage une
-    // source possible de couleur oklch (Tailwind v4 définit shadow-xl via color-mix/oklch)
     cloneElement.style.boxShadow = "none";
+
+    // Récupère le texte de toutes les feuilles de style <link> de la page et
+    // l'injecte tel quel dans un <style> inline propre au clone. En
+    // production, le CSS de Tailwind est chargé via un <link> externe ; pour
+    // le lire, html2canvas doit accéder à ses cssRules en JS, ce qui peut
+    // échouer silencieusement selon comment le fichier est servi (d'où un
+    // rendu sans aucun style). Un <style> inline, lui, est toujours lisible.
+    const styleTag = document.createElement("style");
+    try {
+      const links = Array.from(
+        document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]'),
+      );
+      const cssTexts = await Promise.all(
+        links.map((link) =>
+          fetch(link.href)
+            .then((res) => res.text())
+            .catch(() => ""),
+        ),
+      );
+      styleTag.textContent = cssTexts.join("\n");
+    } catch (err) {
+      console.error("Impossible de récupérer les feuilles de style :", err);
+    }
 
     // Conteneur temporaire, hors écran, en pleine largeur A4
     const tempContainer = document.createElement("div");
+    tempContainer.appendChild(styleTag);
     tempContainer.appendChild(cloneElement);
     tempContainer.style.position = "absolute";
     tempContainer.style.left = "-9999px";
@@ -336,38 +358,20 @@ export const GeneratorContainer = () => {
         useCORS: true,
         logging: true,
         // Empêche html2canvas de remonter jusqu'à <body> pour déterminer
-        // le fond (qui porte le thème DaisyUI en oklch) — c'était très
-        // probablement la vraie source de l'erreur "oklch", puisque le
-        // clone lui-même n'utilise plus que des couleurs hexadécimales.
+        // le fond (qui porte le thème DaisyUI en oklch).
         backgroundColor: "#ffffff",
       },
       jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-      // Évite de couper une expérience ou une formation entre deux pages
-      // "avoid-all" traitait le bloc du corps entier (grille 3 colonnes)
-      // comme un seul élément non sécable, et le poussait en bloc sur la
-      // page suivante s'il ne tenait pas dans l'espace restant — d'où le
-      // grand vide en bas de page. "css" seul respecte uniquement nos
-      // classes break-inside-avoid explicites (posées sur chaque
-      // expérience/formation), ce qui est le comportement voulu.
+      // Évite de couper une expérience ou une formation entre deux pages,
+      // sans pousser des blocs entiers sur la page suivante par précaution.
       pagebreak: { mode: ["css"] },
     };
 
-    // try/catch en plus du .then()/.catch() : si html2pdf lève une erreur
-    // de façon synchrone (avant même de renvoyer sa promesse), le .catch()
-    // ne serait jamais atteint et le conteneur temporaire resterait
-    // indéfiniment dans le DOM — ce qui peut geler les clics sur la page.
     try {
-      html2pdf()
-        .from(cloneElement)
-        .set(options)
-        .save()
-        .then(cleanup)
-        .catch((err: unknown) => {
-          console.error("Erreur lors de l'export PDF :", err);
-          cleanup();
-        });
+      await html2pdf().from(cloneElement).set(options).save();
+      cleanup();
     } catch (err) {
-      console.error("Erreur immédiate lors du lancement de l'export PDF :", err);
+      console.error("Erreur lors de l'export PDF :", err);
       cleanup();
     }
   };

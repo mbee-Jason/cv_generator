@@ -76,7 +76,7 @@ export const Model8 = ({
                         )}
                       </p>
                       <p className="text-[11px] italic text-neutral-500 whitespace-nowrap">
-                        {exp.startYear} – {exp.endYear}
+                        {exp.startYear} – {exp.endYear <= 0 ? "A nos jours" : exp.endYear}
                       </p>
                     </div>
                     {exp.description && (
@@ -105,7 +105,7 @@ export const Model8 = ({
                           {f.institution}
                         </p>
                         <p className="text-neutral-500 text-[11px] italic">
-                          {f.startYear} – {f.endYear}
+                          {f.startYear} – {f.endYear <= 0 ? "A nos jours" : f.endYear}
                         </p>
                       </div>
                     ))}

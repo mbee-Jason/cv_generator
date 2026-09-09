@@ -191,7 +191,7 @@ export const Model7 = ({
                       <Punct>: [</Punct>
                       <Num>{exp.startYear}</Num>
                       <Punct>, </Punct>
-                      <Num>{exp.endYear}</Num>
+                      <Num>{exp.endYear <= 0 ? "A nos jours" : exp.endYear}</Num>
                       <Punct>],</Punct>
                     </p>
                     {exp.description && (
@@ -245,7 +245,7 @@ export const Model7 = ({
                       <Punct>: [</Punct>
                       <Num>{f.startYear}</Num>
                       <Punct>, </Punct>
-                      <Num>{f.endYear}</Num>
+                      <Num>{f.endYear <= 0 ? "A nos jours" : f.endYear}</Num>
                       <Punct>],</Punct>
                     </p>
                     <p>

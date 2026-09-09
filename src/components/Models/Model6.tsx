@@ -105,7 +105,7 @@ export const Model6 = ({
                         )}
                       </p>
                       <p className="text-xs text-neutral-500 whitespace-nowrap">
-                        {exp.startYear} - {exp.endYear}
+                        {exp.startYear} - {exp.endYear <= 0 ? "A nos jours" : exp.endYear}
                       </p>
                     </div>
                     {exp.description && (
@@ -136,7 +136,7 @@ export const Model6 = ({
                           {f.institution}
                         </p>
                         <p className="text-neutral-400 text-xs">
-                          {f.startYear} - {f.endYear}
+                          {f.startYear} - {f.endYear <= 0 ? "A nos jours" : f.endYear}
                         </p>
                       </div>
                     ))}
