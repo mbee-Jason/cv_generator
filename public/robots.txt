@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://cv-generator-mbeej.vercel.app/sitemap.xml
